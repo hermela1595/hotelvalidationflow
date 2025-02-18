@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="04051d30-554f-4415-9889-12be95b3ce45" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="6989562c-60ab-4ad2-85f7-61d497fa7686" />
+	<validation:config name="Validation_Config1" doc:name="Validation Config" doc:id="bed3e53f-9251-41e9-8579-34d5c6694dcf" />
+	<flow name="hotelvalidationflowFlow" doc:id="9a41b98b-dffa-4244-b372-5fb0059583f5" >
+		<http:listener doc:name="Listener" doc:id="9518a342-5196-49e5-b495-df8ce7894887" config-ref="HTTP_Listener_config" path="/bookingValidation"/>
+		<logger level="INFO" doc:name="Logger" doc:id="9aa46394-1109-46a7-8f0c-8d3b37d7a4d8" message="#[payload]"/>
+		<validation:validate-size doc:name="Validate size" doc:id="7b1ee2c9-a7af-4510-abfb-9ff16fbbc1fd" value="#[payload.customerName]" min="5" max="10" message="'Customer name must be a string with a length between 5 and 15 characters.'"/>
+		<validation:is-number numberType="INTEGER" doc:name="Is number" doc:id="32098a6c-4eb4-4048-b785-b37c0260b04f" value="#[payload.phoneNumber]" minValue="10" message="'Phone number must be exactly 10 digits.'"/>
+		<validation:is-true doc:name="Is true" doc:id="958ae59d-0d5c-499d-b4ad-1e2310433027" expression='#[(payload.bookingDate as Date {format: "yyyy-MM-dd"}) &gt; now()]' message="'Booking date must be in the future.'" config-ref="Validation_Config"/>
+		<validation:is-true doc:name="Is true" doc:id="b739458f-95bb-46f3-9aa8-9a2ea5538500" expression='#[(payload.roomType as String) == "Standard" or (payload.roomType as String) == "Deluxe" or (payload.roomType as String) == "Suite"]' message="&quot;Room type must be one of the following: 'Standard', 'Deluxe', or 'Suite'.&quot;" config-ref="Validation_Config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="2c9a0ccb-66ba-4b90-87b2-0a7d2d99c973" message="#[payload]"/>
+	</flow>
+</mule>
